@@ -5,14 +5,12 @@ let photocards = JSON.parse(localStorage.getItem("pcs")) || [
     group: "Enhypen",
     era: "Daydream",
     price: 15,
-    image: "images/Sunghoon.jpg",
-    wishlist: false
+    image: "images/Sunghoon.jpg"
 }
 ];
 
 const binder = document.getElementById("binder");
 const search = document.getElementById("search");
-const totalText = document.getElementById("total");
 
 function save(){
     localStorage.setItem("pcs", JSON.stringify(photocards));
@@ -22,11 +20,7 @@ function render(data){
 
     binder.innerHTML = "";
 
-    let total = 0;
-
     data.forEach(pc => {
-
-        total += Number(pc.price);
 
         binder.innerHTML += `
         <div class="card" onclick="flipCard(this)">
@@ -44,11 +38,9 @@ function render(data){
                     <p>${pc.era}</p>
                     <p>RM ${pc.price}</p>
 
-                    <div class="heart" onclick="toggleWish(event, ${pc.id})">
-                        ${pc.wishlist ? "❤️" : "🤍"}
-                    </div>
-
-                    <button onclick="deleteCard(event, ${pc.id})">Delete</button>
+                    <button class="delete-btn" onclick="deleteCard(event, ${pc.id})">
+                        Delete
+                    </button>
 
                 </div>
 
@@ -58,8 +50,6 @@ function render(data){
         `;
     });
 
-    totalText.innerText = `Total Value: RM ${total}`;
-
     save();
 }
 
@@ -67,15 +57,48 @@ function flipCard(card){
     card.classList.toggle("flipped");
 }
 
-function toggleWish(e, id){
-    e.stopPropagation();
+/* ADD CARD */
+function addCard(){
 
-    const pc = photocards.find(p => p.id === id);
-    pc.wishlist = !pc.wishlist;
+    const file = document.getElementById("imageFile").files[0];
 
-    render(photocards);
+    if(!file){
+        alert("Choose image dulu");
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function(){
+
+        photocards.push({
+            id: Date.now(),
+            idol: document.getElementById("idol").value,
+            group: document.getElementById("group").value,
+            era: document.getElementById("era").value,
+            price: document.getElementById("price").value,
+            image: reader.result
+        });
+
+        render(photocards);
+    }
+
+    reader.readAsDataURL(file);
 }
 
+/* SEARCH */
+search.addEventListener("input", () => {
+
+    const val = search.value.toLowerCase();
+
+    const filtered = photocards.filter(pc =>
+        pc.idol.toLowerCase().includes(val)
+    );
+
+    render(filtered);
+});
+
+/* DELETE */
 function deleteCard(e, id){
     e.stopPropagation();
 
@@ -84,47 +107,52 @@ function deleteCard(e, id){
     render(photocards);
 }
 
-function addCard(){
+/* STATS */
+function showStats(){
 
-    const fileInput = document.getElementById("imageFile");
-    const file = fileInput.files[0];
+    let total = 0;
+    let mostExpensive = photocards[0];
+    let idolCount = {};
 
-    if(!file){
-        alert("Sila pilih gambar dulu!");
-        return;
+    photocards.forEach(pc => {
+
+        total += Number(pc.price);
+
+        // MOST EXPENSIVE
+        if(Number(pc.price) > Number(mostExpensive.price)){
+            mostExpensive = pc;
+        }
+
+        // COUNT PER IDOL
+        if(idolCount[pc.idol]){
+            idolCount[pc.idol]++;
+        } else {
+            idolCount[pc.idol] = 1;
+        }
+    });
+
+    // build idol stats text
+    let idolText = "";
+    for(let idol in idolCount){
+        idolText += `${idol}: ${idolCount[idol]} cards<br>`;
     }
 
-    const reader = new FileReader();
+    document.getElementById("statsText").innerHTML = `
+        📦 Total Cards: ${photocards.length}<br>
+        💰 Total Spent: RM ${total}<br><br>
 
-    reader.onload = function(){
+        👑 Most Expensive:<br>
+        ${mostExpensive.idol} (${mostExpensive.group}) - RM ${mostExpensive.price}<br><br>
 
-        const newCard = {
-            id: Date.now(),
-            idol: document.getElementById("idol").value,
-            group: document.getElementById("group").value,
-            era: document.getElementById("era").value,
-            price: document.getElementById("price").value,
-            image: reader.result,
-            wishlist: false
-        };
+        👤 Cards per Idol:<br>
+        ${idolText}
+    `;
 
-        photocards.push(newCard);
-
-        render(photocards);
-    }
-
-    reader.readAsDataURL(file);
+    document.getElementById("popup").classList.remove("hidden");
 }
 
-search.addEventListener("input", () => {
-
-    const value = search.value.toLowerCase();
-
-    const filtered = photocards.filter(pc =>
-        pc.idol.toLowerCase().includes(value)
-    );
-
-    render(filtered);
-});
+function closeStats(){
+    document.getElementById("popup").classList.add("hidden");
+}
 
 render(photocards);
