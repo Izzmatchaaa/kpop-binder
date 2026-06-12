@@ -1,35 +1,45 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Kpop Binder App</title>
+    <title>Riezz's Binder</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<h1>💖 K-Pop Photocard Binder</h1>
+<h1>💎 Riezz's Binder</h1>
 
-<!-- SEARCH -->
-<input id="search" placeholder="Search idol...">
+<button onclick="showStats()">📊 Stats</button>
 
-<!-- FORM ADD CARD -->
 <div class="form">
 
-    <input id="idol" placeholder="Idol name">
+    <input id="idol" placeholder="Idol">
     <input id="group" placeholder="Group">
     <input id="era" placeholder="Era">
     <input id="price" placeholder="Price RM">
-    <input id="image" placeholder="Image URL (images/xxx.jpg)">
+    <input type="file" id="imageFile">
 
-<input type="file" id="imageFile">
-
-    <button onclick="addCard()">+ Add Photocard</button>
+    <button onclick="addCard()">+ Add Card</button>
 
 </div>
+
+<input id="search" placeholder="Search idol...">
 
 <h3 id="total"></h3>
 
 <div class="binder" id="binder"></div>
+
+<!-- POPUP -->
+<div id="popup" class="popup hidden">
+    <div class="popup-box">
+        <h2>📊 Stats</h2>
+        <p id="statsText"></p>
+        <button onclick="closeStats()">Close</button>
+    </div>
+</div>
 
 <script src="script.js"></script>
 
